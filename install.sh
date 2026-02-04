@@ -2,7 +2,7 @@
 
 # === КОНФИГУРАЦИЯ ===
 GITHUB_USER="Sophiedevops"
-REPO_NAME="singbox-padavan-easy"
+REPO_NAME="singbox-padavan-easy-crawler"
 GITHUB_RAW="https://raw.githubusercontent.com/$GITHUB_USER/$REPO_NAME/main"
 INSTALL_PATH="/opt/tmp_sb_ext/sing-box-1.12.12-extended-1.5.1-linux-mipsle"
 BACKUP_PATH="${INSTALL_PATH}.bak"
@@ -100,7 +100,7 @@ openssl req -x509 -newkey rsa:2048 -nodes -keyout "certs/grpc/h2.pem" -out "cert
 
 # 6. АДАПТАЦИЯ
 echo "[6/8] Adapting configuration..."
-sed -i "s|WORKDIR=.*|WORKDIR=\"$INSTALL_PATH\"|g" update2.sh gen_links.sh
+sed -i "s|WORKDIR=.*|WORKDIR=\"$INSTALL_PATH\"|g" update3.sh gen_links.sh
 sed -i "s|uuid-here|$UUID|g" conf3_final.json
 sed -i "s|ss-password-here|$PASS_SS|g" conf3_final.json
 sed -i "s|hy2-password-here|$PASS_HY|g" conf3_final.json
