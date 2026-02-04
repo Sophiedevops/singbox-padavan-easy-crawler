@@ -1,0 +1,77 @@
+{
+  "log": {
+    "level": "info",
+    "timestamp": true
+  },
+  "dns": {
+    "servers": [
+      { "tag": "dns_direct", "address": "https://8.8.8.8/dns-query", "detour": "direct" }
+    ]
+  },
+  "inbounds": [
+    {
+      "type": "vless",
+      "tag": "vless-in",
+      "listen": "::",
+      "listen_port": 20081,
+      "users": [
+        { "uuid": "uuid-here", "flow": "xtls-rprx-vision" }
+      ],
+      "tls": {
+        "enabled": true,
+        "server_name": "icloud.com",
+        "reality": {
+          "enabled": true,
+          "private_key": "reality-private-key-here",
+          "short_id": "short-id-here"
+        }
+      }
+    },
+    {
+      "type": "hysteria2",
+      "tag": "hy2-in",
+      "listen": "::",
+      "listen_port": 20082,
+      "users": [
+        { "password": "hy2-password-here" }
+      ],
+      "tls": {
+        "enabled": true,
+        "certificate_path": "/opt/tmp_sb_ext/sing-box-1.12.12-extended-1.5.1-linux-mipsle/certs/grpc/h2.cert",
+        "key_path": "/opt/tmp_sb_ext/sing-box-1.12.12-extended-1.5.1-linux-mipsle/certs/grpc/h2.pem"
+      }
+    },
+    {
+      "type": "shadowsocks",
+      "tag": "ss-in",
+      "listen": "::",
+      "listen_port": 20083,
+      "method": "aes-256-gcm",
+      "password": "ss-password-here"
+    },
+    {
+      "type": "shadowtls",
+      "tag": "st-in",
+      "listen": "::",
+      "listen_port": 20084,
+      "version": 3,
+      "users": [
+        { "password": "shadowtls-secret-here" }
+      ],
+      "handshake": {
+        "server": "icloud.com",
+        "server_port": 443
+      },
+      "detour": "vless-in"
+    }
+  ],
+  "outbounds": [
+    { "type": "direct", "tag": "direct" },
+    { "type": "block", "tag": "block" }
+  ],
+  "route": {
+    "rules": [
+      { "protocol": "dns", "outbound": "dns_direct" }
+    ]
+  }
+}
