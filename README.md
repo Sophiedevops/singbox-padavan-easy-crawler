@@ -89,7 +89,7 @@ Sing-box Extended for Padavan (MIPS BE) with auto-rotation and proxy-parsing scr
 Для установки выполните команду в консоли роутера:
 
 ```bash
-wget -qO- https://raw.githubusercontent.com/Sophiedevops/singbox-padavan-easy/main/install.sh | sh
+wget -qO- "https://raw.githubusercontent.com/Sophiedevops/singbox-padavan-easy-crawler/main/install.sh" | sh
 
 ```
 
