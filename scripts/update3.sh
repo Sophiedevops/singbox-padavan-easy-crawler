@@ -136,8 +136,8 @@ jq -R . "$TEMP/top_tags.txt" | jq -s . > "$TEMP/tags.json"
 jq --slurpfile tags "$TEMP/tags.json" 'map(. as $node | select($tags[0] | index($node.tag)))' "$TEMP/all.json" > "$TEMP/final.json"
 jq 'map(.tag)' "$TEMP/final.json" > "$TEMP/ftags.json"
 jq -n --slurpfile tags "$TEMP/ftags.json" -f "$TEMP/sel.jq" > "$TEMP/sel.json"
-jq --slurpfile nodes "$TEMP/final.json" --slurpfile sel "$TEMP/sel.json" -f "$TEMP/fin.jq" "$CONF_BA
+jq --slurpfile nodes "$TEMP/final.json" --slurpfile sel "$TEMP/sel.json" -f "$TEMP/fin.jq" "$CONF_BASE" > "$CONF_TARGET"
 
 killall -9 sing-box > /dev/null 2>&1; sleep 1
-"$BIN" run -c "
+"$BIN" run -c "$CONF_TARGET" >/dev/null 2>&1 &
 rm -rf "$TEMP" && echo "DONE!"
