@@ -35,6 +35,16 @@ if ! command -v jq > /dev/null 2>&1; then
     opkg update && opkg install jq
 fi
 
+if ! command -v curl > /dev/null 2>&1; then
+    echo "Installing curl..."
+    opkg update && opkg install curl
+fi
+
+if ! command -v wget > /dev/null 2>&1; then
+    echo "Installing wget..."
+    opkg update && opkg install wget
+fi
+
 if ! command -v openssl > /dev/null 2>&1; then
     echo "Installing OpenSSL..."
     opkg install openssl-util
@@ -73,7 +83,7 @@ wget -q --no-check-certificate -O "sing-box" "https://github.com/$GITHUB_USER/$R
 [ ! -s "sing-box" ] && { echo "ERROR: Binary download failed!"; exit 1; }
 
 # Скачиваем остальные файлы
-FILES="converter.lua utils.lua update2.sh gen_links.sh conf3_final.json"
+FILES="converter.lua utils.lua update3.sh gen_links.sh conf3_final.json"
 for f in $FILES; do
     case $f in
         *.lua|*.sh) SUBDIR="scripts" ;;
@@ -81,7 +91,7 @@ for f in $FILES; do
     esac
     wget -q --no-check-certificate -O "$f" "$GITHUB_RAW/$SUBDIR/$f"
 done
-chmod +x sing-box update2.sh gen_links.sh
+chmod +x sing-box update3.sh gen_links.sh
 
 # 5. ГЕНЕРАЦИЯ СЕКРЕТОВ
 echo "[5/8] Generating unique keys..."
@@ -128,4 +138,4 @@ if ! grep -q "$INSTALL_PATH/sing-box" "$STARTED_SCRIPT"; then
     mtd_storage.sh save > /dev/null 2>&1
 fi
 
-echo "DONE! Use ./update2.sh to start."
+echo "DONE! Use ./update3.sh to start."
