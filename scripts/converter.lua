@@ -175,10 +175,25 @@ for line in string.gmatch(txt, "[^\r\n]+") do
         local un = clean(rn, count)
         
         local nd = nil
-        if string.find(lnk, "^ss://") then nd = mkSS(string.sub(lnk, 6), un)
-        elseif string.find(lnk, "^vless://") then nd = mkVless(string.sub(lnk, 9), un)
-        elseif string.find(lnk, "^vmess://") then nd = mkVmess(string.sub(lnk, 9), un) end
-        
+        -- Проверяем на shadowsocks (только с ss:// в начале)
+        if lnk:lower():find("^ss://") then 
+            nd = mkSS(lnk:sub(6), un)  -- убираем "ss://"
+        -- Проверяем на vless (только с vless:// в начале)
+        elseif lnk:lower():find("^vless://") then 
+            nd = mkVless(lnk:sub(8), un)  -- убираем "vless://"
+        -- Проверяем на hysteria2 (только с hy2:// в начале)
+        elseif lnk:lower():find("^hy2://") then 
+            nd = mkHy2(lnk:sub(6), un)  -- убираем "hy2://"
+        -- Проверяем на trojan (только с trojan:// в начале)
+        elseif lnk:lower():find("^trojan://") then 
+            nd = mkTrojan(lnk:sub(9), un)  -- убираем "trojan://"
+        -- Проверяем на vmess (только с vmess:// в начале)
+        elseif lnk:lower():find("^vmess://") then 
+            nd = mkVmess(lnk:sub(8), un)  -- убираем "vmess://"
+        -- Пропускаем неполные ссылки (только протокол без://)
+        elseif not string.find(lnk, "://") and (string.lower(lnk) == "ss" or string.lower(lnk) == "vless" or string.lower(lnk) == "hy2" or string.lower(lnk) == "trojan" or string.lower(lnk) == "vmess") then
+            nd = nil  -- явно пропускаем
+        end
         if nd then table.insert(nodes, nd); count = count + 1 end
     end
 end
@@ -187,3 +202,41 @@ local fo = io.open("all_nodes.json", "w")
 fo:write("[\n" .. table.concat(nodes, ",\n") .. "\n]")
 fo:close()
 print(count)
+
+-- Функция для hysteria2
+local function mkHy2(s, n)
+    local u, rest = s:match("^(.-)@(.*)")
+    if not u then return nil end
+    
+    local h, port, p_str = rest:match("^(.-):(%d+)%?(.*)")
+    if not p_str then h, port = rest:match("^(.-):(%d+)"); p_str = "" end
+    
+    if not h or h == "" then return nil end
+    if not port or tonumber(port) == 0 then return nil end
+    
+    local p = parseQ(p_str)
+    local tls = "false"
+    local sni = p["sni"] or h
+    
+    return string.format('{ "type": "hysteria2", "tag": "%s", "server": "%s", "server_port": %s, "password": "%s", "tls": { "enabled": %s, "server_name": "%s", "insecure": true } }', 
+        safe(n), safe(h), port, safe(u), tls, safe(sni))
+end
+
+-- Функция для trojan
+local function mkTrojan(s, n)
+    local u, rest = s:match("^(.-)@(.*)")
+    if not u then return nil end
+    
+    local h, port, p_str = rest:match("^(.-):(%d+)%?(.*)")
+    if not p_str then h, port = rest:match("^(.-):(%d+)"); p_str = "" end
+    
+    if not h or h == "" then return nil end
+    if not port or tonumber(port) == 0 then return nil end
+    
+    local p = parseQ(p_str)
+    local tls = "false"
+    local sni = p["sni"] or h
+    
+    return string.format('{ "type": "trojan", "tag": "%s", "server": "%s", "server_port": %s, "password": "%s", "tls": { "enabled": %s, "server_name": "%s", "insecure": true } }', 
+        safe(n), safe(h), port, safe(u), tls, safe(sni))
+end
