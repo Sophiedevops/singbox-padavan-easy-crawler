@@ -19,7 +19,7 @@ https://raw.githubusercontent.com/amirkma/proxykma/refs/heads/main/mix.txt
 https://raw.githubusercontent.com/DukeMehdi/FreeList-V2ray-Configs/refs/heads/main/Configs/ShadowSocks-V2Ray-Configs-By-DukeMehdi.txt
 https://raw.githubusercontent.com/gongchandang49/TelegramV2rayCollector/refs/heads/main/sub/mix
 https://raw.githubusercontent.com/SoliSpirit/v2ray-configs/refs/heads/main/Protocols/ss.txt
-https://raw.githubusercontent.com/LonUp/NodeList/main/node.txt
+https://raw.githubusercontent.com/hamedcode/port-based-v2ray-configs/main/sub/ss.txt
 "
 
 prepare_temp() {
