@@ -1,6 +1,6 @@
 {
   "log": {
-    "level": "info",
+    "level": "warn",
     "timestamp": true
   },
   "dns": {
@@ -10,30 +10,23 @@
   },
   "inbounds": [
     {
-      "type": "vless",
-      "tag": "vless-in",
-      "listen": "::",
-      "listen_port": 20081,
-      "users": [
-        { "uuid": "618c20c9-faa2-472a-92fd-7a990d5cb3c2", "flow": "xtls-rprx-vision" }
-      ],
-      "tls": {
-        "enabled": true,
-        "server_name": "icloud.com",
-        "reality": {
-          "enabled": true,
-          "private_key": "",
-          "short_id": "faef102e"
-        }
-      }
-    },
+  "type": "vless",
+  "tag": "vless-in",
+  "listen": "::",
+  "listen_port": 20081,
+  "users": [
+    {
+      "uuid": "618c20c9-faa2-472a-92fd-7a990d5cb3c2"
+    }
+  ]
+}
     {
       "type": "hysteria2",
       "tag": "hy2-in",
       "listen": "::",
       "listen_port": 20082,
       "users": [
-        { "password": "bb4a4ab7bf8f4ff2b198" }
+        { "password": "e5b9f828e958aeb8fccf" }
       ],
       "tls": {
         "enabled": true,
@@ -47,7 +40,7 @@
       "listen": "::",
       "listen_port": 20083,
       "method": "aes-256-gcm",
-      "password": "cVLIfVY1K0UR4UR"
+      "password": "uQYvCLE9sw3baswK"
     },
     {
       "type": "shadowtls",
@@ -56,7 +49,7 @@
       "listen_port": 20084,
       "version": 3,
       "users": [
-        { "password": "LYK5in8rGL14khZxiIM" }
+        { "password": "Ey6xzPAj5ecci3OZYGn" }
       ],
       "handshake": {
         "server": "icloud.com",
