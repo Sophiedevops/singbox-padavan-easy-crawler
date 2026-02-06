@@ -131,3 +131,4 @@ fi
 echo "DONE! Use ./update3.sh to start."
 cd /opt/tmp_sb_ext/sing-box-1.12.12-extended-1.5.1-linux-mipsle/
 ./update3.sh
+./gen_links.sh
