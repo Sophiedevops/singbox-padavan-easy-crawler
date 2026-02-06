@@ -13,7 +13,7 @@ CONF_TARGET="$WORKDIR/conf2_final.json"
 
 # PRIORITY: NL -> DE -> US
 FILTER_COUNTRIES="NL,DE,US,PL,FI"
-FILTER_PROTOCOLS="shadowsocks,vless,hysteria2,trojan,vmess"
+FILTER_PROTOCOLS="vless,shadowsocks,hysteria2,trojan,vmess"
 BATCH_SIZE=10
 
 SUBS_LIST="
