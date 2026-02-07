@@ -21,6 +21,23 @@
   ]
 },
     {
+      "type": "trojan",
+      "tag": "trojan-ws",
+      "listen": "::",
+      "listen_port": 20086,
+      "users": [
+        {
+          "password": "your-password"
+        }
+      ],
+      "transport": {
+        "type": "ws",
+        "path": "/",
+        "headers": {
+          "Host": "getfedora.org"
+        }
+      },
+    {
       "type": "hysteria2",
       "tag": "hy2-in",
       "listen": "::",
