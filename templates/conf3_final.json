@@ -1,0 +1,111 @@
+{
+  "log": {
+    "level": "warn",
+    "timestamp": true
+  },
+  "dns": {
+    "servers": [
+      {
+        "tag": "dns_direct",
+        "address": "https://8.8.8.8/dns-query",
+        "detour": "direct"
+      }
+    ]
+  },
+  "inbounds": [
+    {
+      "type": "vless",
+      "tag": "vless-in",
+      "listen": "::",
+      "listen_port": 20081,
+      "users": [
+        {
+          "uuid": "618c20c9-faa2-472a-92fd-7a990d5cb3c2"
+        }
+      ]
+    },
+    {
+      "type": "trojan",
+      "tag": "trojan-ws",
+      "listen": "::",
+      "listen_port": 20086,
+      "users": [
+        {
+          "password": "your-password"
+        }
+      ],
+      "transport": {
+        "type": "ws",
+        "path": "/",
+        "headers": {
+          "Host": "getfedora.org"
+        }
+      }
+    },
+    {
+      "type": "hysteria2",
+      "tag": "hy2-in",
+      "listen": "::",
+      "listen_port": 20082,
+      "users": [
+        {
+          "password": "e5b9f828e958aeb8fccf"
+        }
+      ],
+      "tls": {
+        "enabled": true,
+        "certificate_path": "/opt/tmp_sb_ext/sing-box-1.12.12-extended-1.5.1-linux-mipsle/certs/grpc/h2.cert",
+        "key_path": "/opt/tmp_sb_ext/sing-box-1.12.12-extended-1.5.1-linux-mipsle/certs/grpc/h2.pem"
+      }
+    },
+    {
+      "type": "shadowsocks",
+      "tag": "ss-in",
+      "listen": "::",
+      "listen_port": 20083,
+      "method": "none",
+      "password": "uQYvCLE9sw3baswK"
+    },
+    {
+      "type": "shadowtls",
+      "tag": "st-in",
+      "listen": "::",
+      "listen_port": 20084,
+      "version": 3,
+      "users": [
+        {
+          "password": "Ey6xzPAj5ecci3OZYGn"
+        }
+      ],
+      "handshake": {
+        "server": "icloud.com",
+        "server_port": 443
+      },
+      "detour": "vless-in"
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "direct",
+      "tag": "direct"
+    },
+    {
+      "type": "block",
+      "tag": "block"
+    }
+  ],
+  "route": {
+    "rules": [
+      {
+        "protocol": "dns",
+        "outbound": "dns_direct"
+      }
+    ],
+    "final": "direct"
+  },
+  "experimental": {
+    "clash_api": {
+      "external_controller": "127.0.0.1:9091"
+    }
+  }
+}
