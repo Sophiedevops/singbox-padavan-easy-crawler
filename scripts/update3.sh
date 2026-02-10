@@ -2,7 +2,7 @@
 
 # === НАСТРОЙКИ ===
 WANTED=10
-PERFECT_SPEED_KBPS=500
+PERFECT_SPEED_KBPS=800
 TEST_PORT=25555
 TEST_URLS="https://speed.cloudflare.com/__down?bytes=10485760 https://cachefly.cachefly.net/10mb.test"
 WORKDIR="/opt/tmp_sb_ext/sing-box-1.12.12-extended-1.5.1-linux-mipsle"
