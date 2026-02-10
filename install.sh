@@ -129,7 +129,7 @@ if ! grep -q "$INSTALL_PATH/sing-box" "$STARTED_SCRIPT"; then
 fi
 
 echo "DONE! Use ./update3.sh to start."
-cd /opt/tmp_sb_ext/sing-box-1.12.12-extended-1.5.1-linux-mipsle/
+cd "$INSTALL_PATH"
 ./update3.sh
 
 # Генерируем ссылки после успешного запуска
