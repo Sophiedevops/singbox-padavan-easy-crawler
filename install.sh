@@ -131,3 +131,11 @@ fi
 echo "DONE! Use ./update3.sh to start."
 cd /opt/tmp_sb_ext/sing-box-1.12.12-extended-1.5.1-linux-mipsle/
 ./update3.sh
+
+# Генерируем ссылки после успешного запуска
+if [ $? -eq 0 ]; then
+    sleep 3  # Даем время на инициализацию
+    echo ""
+    echo "Generating connection links..."
+    ./gen_links.sh
+fi
