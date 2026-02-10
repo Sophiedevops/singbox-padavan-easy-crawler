@@ -1,5 +1,9 @@
 # singbox-padavan-easy
 Sing-box Extended for Padavan (MIPS BE) with auto-rotation and proxy-parsing scripts
+![Static Badge](https://img.shields.io/badge/Language-Bash-blue) ![Static Badge](https://img.shields.io/badge/Language-Lua-yellow)
+![Static Badge](https://img.shields.io/badge/github-repo-green)
+
+
 ![Static Badge](https://img.shields.io/badge/Bash-yellow) ![Static Badge](https://img.shields.io/badge/Lua-blue)
 
 ## singbox-padavan-easy 🚀
