@@ -29,6 +29,19 @@ https://raw.githubusercontent.com/LonUp/NodeList/main/node.txt
 "
 
 prepare_temp() {
+    # FIX 1: Убиваем ВСЕ процессы sing-box перед началом
+    killall -9 sing-box > /dev/null 2>&1
+    sleep 2
+    
+    # FIX 2: Проверяем, что порт свободен
+    if netstat -tuln 2>/dev/null | grep -q ":$TEST_PORT "; then
+        echo "Port $TEST_PORT is still busy, waiting..."
+        sleep 3
+        # Повторная проверка и попытка освободить порт
+        killall -9 sing-box > /dev/null 2>&1
+        sleep 2
+    fi
+    
     rm -rf "$TEMP" && mkdir -p "$TEMP"
     touch "$TEMP/results.txt"
     # Исправленный генератор конфига для тестов
@@ -57,23 +70,30 @@ if [ -f "$CONF_TARGET" ]; then
         "$BIN" run -c "$TEMP/run_fast.json" > /dev/null 2>&1 &
         FPID=$! && sleep 10
         
-        PASS=0
-        for i in 1 2 3; do
-            SPD=$(curl -x socks5://127.0.0.1:$TEST_PORT -s -o /dev/null -w "%{speed_download}" --max-time 8 "$ACTIVE_TEST_URL")
-            KBPS=$(echo "$SPD" | awk '{print int($1 / 1024)}')
-            echo "  Test $i: $KBPS KB/s"
-            [ "$KBPS" -ge "$PERFECT_SPEED_KBPS" ] && PASS=$((PASS+1))
+        # FIX 3: Проверяем что процесс запустился
+        if ! ps | grep -q "$FPID" 2>/dev/null; then
+            echo "  Failed to start sing-box for fast check"
+            kill -9 $FPID > /dev/null 2>&1
+        else
+            PASS=0
+            for i in 1 2 3; do
+                SPD=$(curl -x socks5://127.0.0.1:$TEST_PORT -s -o /dev/null -w "%{speed_download}" --max-time 8 "$ACTIVE_TEST_URL")
+                KBPS=$(echo "$SPD" | awk '{print int($1 / 1024)}')
+                echo "  Test $i: $KBPS KB/s"
+                [ "$KBPS" -ge "$PERFECT_SPEED_KBPS" ] && PASS=$((PASS+1))
+                sleep 1
+            done
+            kill -9 $FPID > /dev/null 2>&1
             sleep 1
-        done
-        kill -9 $FPID > /dev/null 2>&1
-        
-        if [ "$PASS" -ge 2 ]; then
-            echo "  Nodes are stable ($PASS/3 passes). Restarting service..."
-            killall -9 sing-box >/dev/null 2>&1; sleep 1
-            "$BIN" run -c "$CONF_TARGET" >/dev/null 2>&1 &
-            rm -rf "$TEMP" && exit 0
+            
+            if [ "$PASS" -ge 2 ]; then
+                echo "  Nodes are stable ($PASS/3 passes). Restarting service..."
+                killall -9 sing-box >/dev/null 2>&1; sleep 1
+                "$BIN" run -c "$CONF_TARGET" >/dev/null 2>&1 &
+                rm -rf "$TEMP" && exit 0
+            fi
+            echo "  Unstable nodes. Forcing full update..."
         fi
-        echo "  Unstable nodes. Forcing full update..."
     fi
 fi
 
@@ -158,8 +178,8 @@ while [ $DONE -lt 200 ] && [ $CUR -lt $TOTAL ]; do
             echo "  [FOUND] $BEST: $KBPS KB/s"
             echo "$KBPS|$BEST" >> "$TEMP/results.txt"
             
-            # Проверка количества найденных хороших узлов
-            G_COUNT=$(awk -F'|' -v p="$PERFECT_SPEED_KBPS" '$1 >= p {c++} END {print c+0}' "$TEMP/results.txt")
+            # FIX 4: Исправлен подсчет найденных хороших узлов - используем wc вместо awk
+            G_COUNT=$(wc -l < "$TEMP/results.txt" | tr -d ' ')
             echo "  Total Found: $G_COUNT / $WANTED"
             
             if [ "$G_COUNT" -ge "$WANTED" ]; then 
@@ -170,7 +190,10 @@ while [ $DONE -lt 200 ] && [ $CUR -lt $TOTAL ]; do
         fi
     fi
     
+    # FIX 5: Улучшенное завершение процесса с повторной проверкой
     kill -9 $PID > /dev/null 2>&1
+    sleep 1
+    ps | grep $PID | grep -v grep > /dev/null && kill -9 $PID 2>/dev/null
     wait $PID 2>/dev/null
     CUR=$NXT
     DONE=$(expr $DONE + 1)
@@ -197,9 +220,18 @@ jq --slurpfile nodes "$TEMP/final.json" --slurpfile sel "$TEMP/sel.json" -f "$TE
 # === 6. RESTART ===
 if [ -s "$CONF_TARGET" ]; then
     echo "Restarting service with new config..."
-    killall -9 sing-box > /dev/null 2>&1; sleep 1
+    # FIX 6: Полная очистка всех старых процессов перед запуском нового
+    killall -9 sing-box > /dev/null 2>&1
+    sleep 2
     "$BIN" run -c "$CONF_TARGET" > /dev/null 2>&1 &
-    echo "DONE!"
+    NEW_PID=$!
+    sleep 2
+    # Проверяем что новый процесс запустился
+    if ps | grep -q "$NEW_PID" 2>/dev/null; then
+        echo "DONE! Service started (PID: $NEW_PID)"
+    else
+        echo "WARNING: Service may not have started properly"
+    fi
 else
     echo "ERROR: Config generation failed (empty file)."
 fi
