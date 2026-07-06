@@ -1,55 +1,59 @@
 (function () {
     'use strict';
 
-    // Защита от двойного запуска (если Лампа решит загрузить скрипт дважды)
     if (window.proxy_plugin_running) return;
     window.proxy_plugin_running = true;
 
+    var proxyKey = 'proxy_custom_ip';
+    var defaultProxy = '192.168.1.1:1081';
+
+    // Записываем дефолт, если пусто
+    if (!Lampa.Storage.get(proxyKey)) {
+        Lampa.Storage.set(proxyKey, defaultProxy);
+    }
+
     function initProxyPlugin() {
-        var proxyKey = 'proxy_custom_ip';
-        var defaultProxy = '192.168.1.1:1081';
-
-        // Если в памяти телевизора еще нет записи, прописываем дефолт
-        if (!Lampa.Storage.get(proxyKey)) {
-            Lampa.Storage.set(proxyKey, defaultProxy);
-        }
-
-        // Встраиваемся в существующий системный раздел "Сервер"
+        // Добавляем КНОПКУ, которая вызовет клавиатуру
         Lampa.SettingsApi.addParam({
             component: 'server',
             param: {
-                name: proxyKey,
-                type: 'input',
-                default: defaultProxy
+                name: 'proxy_btn_edit',
+                type: 'button'
             },
             field: {
-                name: 'Прокси для видео',
-                description: 'Формат IP:PORT. Оставьте пустым для отключения.'
+                name: 'Настроить прокси для видео',
+                description: 'Текущий: ' + (Lampa.Storage.get(proxyKey) || 'Отключен (напрямую)')
             },
-            onChange: function (value) {
-                Lampa.Noty.show('Прокси для видео: ' + (value || 'Отключен'));
+            onChange: function () {
+                Lampa.Input.edit({
+                    title: 'IP:PORT (оставьте пустым для откл.)',
+                    value: Lampa.Storage.get(proxyKey) || '',
+                    free: true,
+                    nosave: true
+                }, function (new_value) {
+                    Lampa.Storage.set(proxyKey, new_value);
+                    Lampa.Noty.show('Прокси сохранен: ' + (new_value || 'Отключен'));
+                    // Чтобы описание кнопки обновилось, просим переоткрыть настройки
+                    setTimeout(function(){ Lampa.Noty.show('Перезайдите в настройки для обновления статуса'); }, 1500);
+                });
             }
         });
 
-        // Аккуратный перехват исключительно функции плеера
+        // Аккуратный перехват ссылки плеера
         var originalPlay = Lampa.Player.play;
         Lampa.Player.play = function (data) {
             var proxy = Lampa.Storage.get(proxyKey);
             
             if (data && data.url && proxy && proxy.trim() !== '') {
                 var cleanProxy = proxy.replace(/^(https?:\/\/)/, '').replace(/\/$/, '').trim();
-                // Оборачиваем оригинальную ссылку в прокси
                 data.url = 'http://' + cleanProxy + '/?url=' + encodeURIComponent(data.url);
             }
             
-            // Запускаем плеер с подмененной ссылкой
             originalPlay.call(Lampa.Player, data);
         };
-
-        Lampa.Noty.show('Плагин Прокси: ищите настройки в разделе Сервер');
     }
 
-    // Ждем ПОЛНОЙ загрузки ядра Лампы, как это делают Skaz и Netfix
+    // Ждем готовности Лампы
     if (window.appready) {
         initProxyPlugin();
     } else {
