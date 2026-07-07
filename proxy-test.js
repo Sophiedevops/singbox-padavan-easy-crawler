@@ -1,37 +1,32 @@
 (function () {
     'use strict';
 
-    // Жесткая блокировка двойного запуска скрипта
     if (window.streamproxy_step1_loaded) return;
     window.streamproxy_step1_loaded = true;
 
-    // Наш мини-словарь для локализации интерфейса
-    var i18n = {
-        ru: {
-            title: 'Прокси потока (Шаг 1)',
-            desc: 'Стерильная загрузка прошла успешно. Блокировок сети нет.',
-            notify: 'Клик работает! Локализация: РУС'
-        },
-        en: {
-            title: 'StreamProxy (Step 1)',
-            desc: 'Sterile loading successful. No network blocks.',
-            notify: 'Click works! Localization: ENG'
+    // Эту функцию мы вызовем ТОЛЬКО тогда, когда таймер подтвердит, что ядро Лампы 100% загружено
+    function startPlugin() {
+        var i18n = {
+            ru: {
+                title: 'Прокси потока (Шаг 1)',
+                desc: 'Таймер отработал идеально! Плагин выжил.',
+                notify: 'Интерфейс отрисован, локализация работает.'
+            },
+            en: {
+                title: 'StreamProxy (Step 1)',
+                desc: 'Timer worked perfectly! Plugin survived.',
+                notify: 'Interface rendered, localization works.'
+            }
+        };
+
+        function getLang(key) {
+            var lang = (Lampa.Storage.get('language') || 'en').toLowerCase();
+            var dict = i18n[lang] ? i18n[lang] : i18n['ru'];
+            return dict[key] || key;
         }
-    };
 
-    // Функция-помощник для перевода
-    function getLang(key) {
-        // Получаем язык ядра. По умолчанию ставим английский, если язык не определен
-        var lang = (Lampa.Storage.get('language') || 'en').toLowerCase();
-        // Если в нашем словаре нет языка пользователя (например, uk), откатываемся к ru
-        var dict = i18n[lang] ? i18n[lang] : i18n['ru'];
-        return dict[key] || key;
-    }
-
-    // Основная функция отрисовки интерфейса (вызывается ТОЛЬКО когда ядро готово)
-    function initPlugin() {
         Lampa.SettingsApi.addParam({
-            component: 'player', // Встраиваемся в гарантированно существующий раздел "Плеер"
+            component: 'player', 
             param: {
                 name: 'streamproxy_dummy_btn',
                 type: 'button'
@@ -44,18 +39,19 @@
                 Lampa.Noty.show(getLang('notify'));
             }
         });
-
-        console.log('StreamProxy Plugin: Успешно инициализирован.');
     }
 
-    // Тотальная пассивность: ждем команду от ядра Lampa
+    // Железобетонный метод ожидания без обращения к объекту Lampa напрямую
     if (window.appready) {
-        initPlugin();
+        startPlugin();
     } else {
-        Lampa.Listener.follow('app', function (e) {
-            if (e.type == 'ready') {
-                initPlugin();
+        // Запускаем тихий таймер: проверяем готовность каждые 200 миллисекунд
+        var checkReadyTimer = setInterval(function () {
+            // Если флаг appready поднят И объект Lampa существует в памяти
+            if (window.appready && window.Lampa && window.Lampa.SettingsApi) {
+                clearInterval(checkReadyTimer); // Убиваем таймер, он больше не нужен
+                startPlugin();                  // Запускаем отрисовку
             }
-        });
+        }, 200);
     }
 })();
