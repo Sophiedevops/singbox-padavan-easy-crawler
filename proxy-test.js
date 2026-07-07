@@ -1,35 +1,60 @@
 (function () {
     'use strict';
 
-    if (window.proxy_step1_initialized) return;
-    window.proxy_step1_initialized = true;
+    // Жесткая блокировка двойного запуска скрипта
+    if (window.streamproxy_step1_loaded) return;
+    window.streamproxy_step1_loaded = true;
 
-    function initStepOne() {
+    // Наш мини-словарь для локализации интерфейса
+    var i18n = {
+        ru: {
+            title: 'Прокси потока (Шаг 1)',
+            desc: 'Стерильная загрузка прошла успешно. Блокировок сети нет.',
+            notify: 'Клик работает! Локализация: РУС'
+        },
+        en: {
+            title: 'StreamProxy (Step 1)',
+            desc: 'Sterile loading successful. No network blocks.',
+            notify: 'Click works! Localization: ENG'
+        }
+    };
+
+    // Функция-помощник для перевода
+    function getLang(key) {
+        // Получаем язык ядра. По умолчанию ставим английский, если язык не определен
+        var lang = (Lampa.Storage.get('language') || 'en').toLowerCase();
+        // Если в нашем словаре нет языка пользователя (например, uk), откатываемся к ru
+        var dict = i18n[lang] ? i18n[lang] : i18n['ru'];
+        return dict[key] || key;
+    }
+
+    // Основная функция отрисовки интерфейса (вызывается ТОЛЬКО когда ядро готово)
+    function initPlugin() {
         Lampa.SettingsApi.addParam({
-            component: 'player', // Цепляемся к железобетонному разделу "Плеер"
+            component: 'player', // Встраиваемся в гарантированно существующий раздел "Плеер"
             param: {
-                name: 'proxy_dummy_btn',
+                name: 'streamproxy_dummy_btn',
                 type: 'button'
             },
             field: {
-                name: 'Прокси (Шаг 1: Пустышка)',
-                description: 'Проверка интерфейса без блокировки сети. Остальные плагины живы?'
+                name: getLang('title'),
+                description: getLang('desc')
             },
             onChange: function () {
-                Lampa.Noty.show('Шаг 1: Кнопка работает! Можно двигаться дальше.');
+                Lampa.Noty.show(getLang('notify'));
             }
         });
 
-        console.log('ProxyPlugin Шаг 1: успешно добавлен в Плеер');
+        console.log('StreamProxy Plugin: Успешно инициализирован.');
     }
 
-    // Ждем полной загрузки системы
+    // Тотальная пассивность: ждем команду от ядра Lampa
     if (window.appready) {
-        initStepOne();
+        initPlugin();
     } else {
         Lampa.Listener.follow('app', function (e) {
             if (e.type == 'ready') {
-                initStepOne();
+                initPlugin();
             }
         });
     }
