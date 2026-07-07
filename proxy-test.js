@@ -1,65 +1,35 @@
 (function () {
     'use strict';
 
-    if (window.proxy_plugin_running) return;
-    window.proxy_plugin_running = true;
+    if (window.proxy_step1_initialized) return;
+    window.proxy_step1_initialized = true;
 
-    var proxyKey = 'proxy_custom_ip';
-    var defaultProxy = '192.168.1.1:1081';
-
-    // Записываем дефолт, если пусто
-    if (!Lampa.Storage.get(proxyKey)) {
-        Lampa.Storage.set(proxyKey, defaultProxy);
-    }
-
-    function initProxyPlugin() {
-        // Добавляем КНОПКУ, которая вызовет клавиатуру
+    function initStepOne() {
         Lampa.SettingsApi.addParam({
-            component: 'server',
+            component: 'player', // Цепляемся к железобетонному разделу "Плеер"
             param: {
-                name: 'proxy_btn_edit',
+                name: 'proxy_dummy_btn',
                 type: 'button'
             },
             field: {
-                name: 'Настроить прокси для видео',
-                description: 'Текущий: ' + (Lampa.Storage.get(proxyKey) || 'Отключен (напрямую)')
+                name: 'Прокси (Шаг 1: Пустышка)',
+                description: 'Проверка интерфейса без блокировки сети. Остальные плагины живы?'
             },
             onChange: function () {
-                Lampa.Input.edit({
-                    title: 'IP:PORT (оставьте пустым для откл.)',
-                    value: Lampa.Storage.get(proxyKey) || '',
-                    free: true,
-                    nosave: true
-                }, function (new_value) {
-                    Lampa.Storage.set(proxyKey, new_value);
-                    Lampa.Noty.show('Прокси сохранен: ' + (new_value || 'Отключен'));
-                    // Чтобы описание кнопки обновилось, просим переоткрыть настройки
-                    setTimeout(function(){ Lampa.Noty.show('Перезайдите в настройки для обновления статуса'); }, 1500);
-                });
+                Lampa.Noty.show('Шаг 1: Кнопка работает! Можно двигаться дальше.');
             }
         });
 
-        // Аккуратный перехват ссылки плеера
-        var originalPlay = Lampa.Player.play;
-        Lampa.Player.play = function (data) {
-            var proxy = Lampa.Storage.get(proxyKey);
-            
-            if (data && data.url && proxy && proxy.trim() !== '') {
-                var cleanProxy = proxy.replace(/^(https?:\/\/)/, '').replace(/\/$/, '').trim();
-                data.url = 'http://' + cleanProxy + '/?url=' + encodeURIComponent(data.url);
-            }
-            
-            originalPlay.call(Lampa.Player, data);
-        };
+        console.log('ProxyPlugin Шаг 1: успешно добавлен в Плеер');
     }
 
-    // Ждем готовности Лампы
+    // Ждем полной загрузки системы
     if (window.appready) {
-        initProxyPlugin();
+        initStepOne();
     } else {
         Lampa.Listener.follow('app', function (e) {
             if (e.type == 'ready') {
-                initProxyPlugin();
+                initStepOne();
             }
         });
     }
